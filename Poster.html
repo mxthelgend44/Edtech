@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EdTech & Learning Poster</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+    :root {
+      --bg: #1E1E1E;
+      --card-bg: #121212;
+      --border-color: #262626;
+      --text: #ffffff;
+      --highlight-grad: linear-gradient(135deg, #27f94a, #36ecfd);
+      --chart-bg: #1E1E1E;
+      --grid-lines: rgba(255,255,255,0.08);
+      --icon-color: #36ecfd;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 20px;
+      position: relative;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+     /* Use a functional placeholder or remove if not needed */
+    body::before {
+      content: '';
+      position: absolute;
+      top: -50px;
+      left: -50px;
+      width: 120%;
+      height: 300px;
+      background: url('https://via.placeholder.com/800x200/1E1E1E/1E1E1E?text=') no-repeat center;
+      /* Functional Placeholder */
+      background-size: contain;
+      opacity: 0.08;
+      z-index: -1;
+    }
+
+    header {
+      padding: 30px 20px;
+      background: var(--card-bg);
+      border: 2px solid var(--border-color);
+      border-radius: 16px;
+      margin-bottom: 30px;
+      text-align: center;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: var(--highlight-grad);
+    }
+
+    header h1 {
+      font-size: 2.7em;
+      background: linear-gradient(to bottom, #ffffff, #a0a0a0);
+      -webkit-background-clip: text;
+      background-clip: text; /* Standard property */
+      -webkit-text-fill-color: transparent;
+      color: transparent; /* Fallback */
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+    }
+
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 25px;
+      max-width: 1400px;
+      margin: auto;
+    }
+
+    .grid-item {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+      transition: all 0.3s ease;
+      /* Added flex properties for better layout */
+      display: flex;
+      flex-direction: column;
+    }
+
+    .grid-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.25);
+      border-color: rgba(39, 249, 74, 0.3);
+    }
+
+    h2 {
+      font-size: 1.8em;
+      margin-top: 0;
+      margin-bottom: 18px;
+      background: linear-gradient(to bottom, #ffffff, #a0a0a0);
+      -webkit-background-clip: text;
+       background-clip: text;
+      /* Standard property */
+      -webkit-text-fill-color: transparent;
+       color: transparent;
+      /* Fallback */
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-icon {
+      margin-right: 12px;
+      color: var(--icon-color);
+      font-size: 1.4em;
+      width: 30px;
+      height: 30px;
+      min-width: 30px; /* Prevent shrinking */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(54, 236, 253, 0.1);
+      border-radius: 50%;
+      padding: 8px;
+    }
+     .section-icon i {
+        font-size: 0.8em;
+        /* Control icon size if needed */
+     }
+
+
+    ul {
+      padding-left: 20px;
+      margin-top: 15px;
+      margin-bottom: 15px; /* Add consistent spacing */
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    p {
+      margin-bottom: 15px;
+      font-weight: 300;
+      font-size: 1.05em;
+      flex-grow: 1;
+      /* Allow text to take space */
+    }
+
+    /* Ensure content above chart doesn't prevent chart from showing */
+     .grid-item > *:not(.chart-container) {
+       flex-shrink: 0;
+     }
+
+    .chart-container {
+      position: relative;
+      height: 400px; /* << Increased height */
+      width: 100%; /* Take full width of grid item */
+      margin-top: auto; /* Push to bottom */
+      flex-shrink: 0; /* Prevent shrinking */
+    }
+
+    canvas {
+      background-color: var(--chart-bg);
+      padding: 15px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.05);
+      /* Added for better canvas sizing */
+      display: block; /* Prevents extra space below canvas */
+      box-sizing: border-box; /* Include padding/border in size */
+      width: 100%;
+      height: 100%;
+    }
+
+    .reference {
+      font-size: 0.85em;
+      color: #aaa;
+      max-width: 1400px;
+      margin: 40px auto;
+      padding: 20px 25px;
+      background: #121212;
+      border-left: 4px solid;
+      /* Restore original border-image */
+      border-image: var(--highlight-grad) 1;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .reference h3 {
+      color: #fff;
+      margin-top: 0;
+      font-size: 1.3em;
+      display: flex;
+      align-items: center;
+    }
+
+    .reference p {
+      margin: 8px 0;
+      line-height: 1.5;
+      font-size: 0.9em;
+    }
+
+    .subsection {
+      margin-top: 15px;
+      margin-bottom: 15px;
+      /* Add spacing */
+    }
+
+    .subsection-title {
+      font-weight: 500;
+      color: #36ecfd;
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>The Impact of Educational Technology on Learning and Memory</h1>
+  </header>
+
+  <div class="grid-container">
+     <div class="grid-item">
+       <h2>
+         <span class="section-icon"><i class="fas fa-rocket"></i></span>
+         1. Introduction
+       </h2>
+       <p>EdTech adoption is accelerating globally, yet outcomes vary widely. Active‑learning students outperform lecture‑based peers by 6 percentage points on exams (Freeman et al., 2014).</p>
+       <p>Interactive multimedia improves performance by 11% over non‑interactive formats (Sitzmann, 2011).</p>
+       <p>However, only ~7% of MOOC participants complete their courses despite over 200 million learners enrolled (Jordan, 2014).</p>
+       <div class="chart-container">
+         <canvas id="introChart"></canvas>
+       </div>
+     </div>
+     <div class="grid-item">
+       <h2>
+         <span class="section-icon"><i class="fas fa-brain"></i></span>
+         2. Theoretical Framework
+       </h2>
+       <p><strong>Cognitive Load Theory (CLT):</strong></p>
+       <p>Defines intrinsic, extraneous, and germane load. Instructional design should reduce extraneous and foster germane processing (Sweller, van Merriënboer, & Paas, 2011).</p>
+       <p><strong>Cognitive Theory of Multimedia Learning (CTML):</strong></p>
+       <p>Learners process information via dual channels (visual and auditory). Effective multimedia uses aligned narration and visuals while avoiding redundant text (Mayer, 2009).</p>
+       <div class="chart-container">
+         <canvas id="loadChart"></canvas>
+       </div>
+     </div>
+     <div class="grid-item">
+       <h2>
+         <span class="section-icon"><i class="fas fa-chart-line"></i></span>
+         3. Key Findings
+       </h2>
+       <p>Interactive multimedia leads to 11% improved learning outcomes (Sitzmann, 2011).</p>
+       <p>Gamified instruction improves engagement and achievement (g = 0.27, a moderate effect) (Hamari et al., 2014).</p>
+       <p>Adaptive tools that personalize feedback boost mastery by ~12% (Kizilcec & Brooks, 2018).</p>
+       <p>Clicker‑based peer learning enhances conceptual understanding by ~30% (Denny et al., 2008).</p>
+       <div class="chart-container">
+         <canvas id="keyFindingsChart"></canvas>
+       </div>
+     </div>
+     <div class="grid-item">
+       <h2>
+         <span class="section-icon"><i class="fas fa-gamepad"></i></span>
+         4. Interactive Multimedia
+       </h2>
+       <p>11% gain in learning outcomes with interactive elements compared to static media (Sitzmann, 2011).</p>
+       <div class="chart-container">
+         <canvas id="interactiveChart"></canvas>
+       </div>
+     </div>
+     <div class="grid-item">
+       <h2>
+         <span class="section-icon"><i class="fas fa-user-graduate"></i></span>
+         5. Adaptive Learning
+       </h2>
+       <p>Personalized feedback features increase mastery rates by ~12% compared to non-adaptive approaches (Kizilcec & Brooks, 2018).</p>
+       <div class="chart-container">
+         <canvas id="adaptiveChart"></canvas>
+       </div>
+     </div>
+     <div class="grid-item">
+       <h2>
+         <span class="section-icon"><i class="fas fa-universal-access"></i></span>
+         6. Active Learning
+       </h2>
+       <p>Active‑learning students outperform lecture‑based peers by an average of 6 percentage points on exams (Freeman et al., 2014).</p>
+       <div class="chart-container">
+         <canvas id="activeLearningChart"></canvas>
+       </div>
+     </div>
+     <div class="grid-item">
+       <h2>
+         <span class="section-icon"><i class="fas fa-exclamation-triangle"></i></span>
+         7. Consequences of Poor Design
+       </h2>
+
+       <div class="subsection">
+         <p class="subsection-title">Attention Disruptions:</p>
+         <p>Heavy media multitaskers score 0.6 SD lower on task‑switching tests (Ophir, Nass, & Wagner, 2009).</p>
+         <p>In‑class phone use correlates with 30% lower retention of lecture material (Kuznekoff, Munz, & Titsworth, 2015).</p>
+       </div>
+
+       <div class="subsection">
+         <p class="subsection-title">Cognitive Fatigue & Dropout:</p>
+         <p>High evening screen exposure associates with a 10% drop in working‑memory performance (Twenge & Campbell, 2018).</p>
+         <p>MOOCs suffer from a 93% dropout rate (Jordan, 2014).</p>
+       </div>
+
+       <div class="subsection">
+         <p class="subsection-title">Poor Visual Design:</p>
+         <p>Unnecessary animations or visuals can raise error rates by 15% (Chandler & Sweller, 1991).</p>
+       </div>
+
+       <div class="chart-container">
+         <canvas id="poorDesignChart"></canvas> </div>
+     </div>
+     <div class="grid-item">
+       <h2>
+         <span class="section-icon"><i class="fas fa-bell"></i></span>
+         8. MOOC Completion
+       </h2>
+       <p>Only ~7% of MOOC enrollees complete their courses, despite over 200 million learners registered for at least one MOOC by 2021 (Jordan, 2014).</p>
+       <div class="chart-container">
+         <canvas id="moocChart"></canvas>
+       </div>
+     </div>
+     <div class="grid-item">
+       <h2>
+         <span class="section-icon"><i class="fas fa-lightbulb"></i></span>
+         9. Recommendations
+       </h2>
+       <p>Apply Guided Multimedia: Synchronize narration and graphics; eliminate redundant text (Mayer, 2009).</p>
+       <p>Minimize Distractions: Follow CLT's coherence principle—remove irrelevant UI elements (Sweller et al., 2011).</p>
+       <p>Embed Retrieval Practice: Incorporate low‑stakes quizzes to strengthen long‑term retention (Roediger & Butler, 2011).</p>
+       <p>Use Adaptive Feedback: Leverage algorithms to tailor difficulty and pace to individual learners (Kizilcec & Brooks, 2018).</p>
+       <p>Facilitate Peer Interaction: Integrate clicker or live‑poll sessions to foster discussion and deepen understanding (Denny et al., 2008).</p>
+       <div class="chart-container">
+         <canvas id="recommendationChart"></canvas>
+       </div>
+     </div>
+     <div class="grid-item">
+       <h2>
+         <span class="section-icon"><i class="fas fa-flag-checkered"></i></span>
+         10. Conclusion
+       </h2>
+       <p>Effective EdTech must be grounded in cognitive science. By minimizing distraction and leveraging guided multimedia, retrieval practice, and adaptivity, we can enhance engagement, retention, and learner equity.</p>
+     </div>
+  </div> <div class="reference">
+    <h3>
+      <span class="section-icon"><i class="fas fa-book"></i></span>
+      References
+    </h3>
+     <p>Chandler, P., & Sweller, J. (1991). Cognitive load theory and the format of instruction. Cognition and Instruction, 8(4), 293–332.</p>
+     <p>Denny, P., Hanks, B., & Dissanayake, I. (2008). Peer Instruction in programming: Beyond multiple choice. ACM SIGCSE Bulletin, 40(1), 212–216.</p>
+     <p>Freeman, S., Eddy, S. L., McDonough, M., Smith, M. K., Okoroafor, N., Jordt, H., & Wenderoth, M. P. (2014). Active learning increases student performance in science, engineering, and mathematics. Proceedings of the National Academy of Sciences, 111(23), 8410–8415.</p>
+     <p>Hamari, J., Koivisto, J., & Sarsa, H. (2014). Does gamification work? A literature review of empirical studies on gamification. Computers in Human Behavior, 47, 254–271.</p>
+     <p>Jordan, K. (2014). Initial trends in enrolment and completion of massive open online courses. The International Review of Research in Open and Distributed Learning, 15(1), 133–160.</p>
+     <p>Kizilcec, R. F., & Brooks, C. (2018). Diverse designs for massive open online courses: Empirically derived design guidelines for personalized learning. Computers & Education, 115, 243–257.</p>
+     <p>Kuznekoff, J. H., Munz, S., & Titsworth, S. (2015). Mobile phones in the classroom: Examining the effects of texting, Twitter, and message content on student learning. Communication Education, 64(3), 344–365.</p>
+     <p>Mayer, R. E. (2009). The Cambridge handbook of multimedia learning. Cambridge University Press.</p>
+     <p>Ophir, E., Nass, C., & Wagner, A. D. (2009). Cognitive control in media multitaskers. Proceedings of the National Academy of Sciences, 106(37), 15583–15587.</p>
+     <p>Roediger, H. L., & Butler, A. C. (2011). The critical role of retrieval practice in long‑term retention. Trends in Cognitive Sciences, 15(1), 20–27.</p>
+     <p>Sitzmann, T. (2011). A meta‑analytic examination of the instructional effectiveness of computer‑based simulation games. Personnel Psychology, 64(2), 489–528.</p>
+     <p>Sweller, J., van Merriënboer, J. J. G., & Paas, F. G. W. C. (2011). Cognitive load theory. Springer.</p>
+     <p>Twenge, J. M., & Campbell, W. K. (2018). Associations between screen time and lower psychological well‑being among children and adolescents: Evidence from a population‑based study. Preventive Medicine Reports, 12, 271–283.</p>
+  </div> <script>
+    // --- Wrap all code in DOMContentLoaded listener ---
+    document.addEventListener('DOMContentLoaded', function() {
+
+      console.log("DOM Loaded. Initializing charts..."); // Debug log
+
+      // --- More robust gradient function ---
+      function createGradient(ctx, startColor, endColor) {
+        if (!ctx || !ctx.chart) return startColor; // Fallback if context or chart isn't ready
+        const chartArea = ctx.chart.chartArea;
+        // Use chartArea if available, otherwise estimate based on canvas
+        const height = chartArea ? chartArea.bottom - chartArea.top : ctx.canvas.height || 400;
+        const gradient = ctx.createLinearGradient(0, chartArea ? chartArea.top : 0, 0, chartArea ? chartArea.bottom : height);
+        gradient.addColorStop(0, startColor);
+        gradient.addColorStop(1, endColor);
+        return gradient;
+      }
+
+       // --- Helper to get context safely ---
+       function getCanvasContext(id) {
+            const canvas = document.getElementById(id);
+            if (!canvas) {
+                console.error(`Canvas element with ID "${id}" not found.`);
+                return null;
+            }
+            // Check if canvas has dimensions
+            if (canvas.clientHeight <= 0 || canvas.clientWidth <= 0) {
+                console.warn(`Canvas ID "${id}" has zero height or width. Ensure CSS is setting dimensions correctly for .chart-container and canvas.`);
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                 console.error(`Failed to get 2D context for canvas ID "${id}".`);
+            }
+            return ctx;
+       }
+
+      // --- Register Plugin ---
+      // Ensure plugin is available before registering
+      if (typeof ChartDataLabels !== 'undefined') {
+         try {
+            Chart.register(ChartDataLabels);
+            console.log("ChartDataLabels plugin registered.");
+         } catch (e) {
+             console.error("Error registering ChartDataLabels:", e);
+         }
+      } else {
+          console.warn("ChartDataLabels plugin script not loaded or failed.");
+      }
+
+
+      // --- Chart Defaults and Common Options (Originals Restored) ---
+      Chart.defaults.color = '#fff';
+      Chart.defaults.font.family = 'Roboto';
+      Chart.defaults.scale.grid.color = 'rgba(255, 255, 255, 0.05)';
+      Chart.defaults.plugins.legend.labels.font = { family: 'Roboto', size: 12 };
+      Chart.defaults.plugins.legend.position = 'bottom'; // Default, can override
+      Chart.defaults.plugins.legend.labels.usePointStyle = true;
+      Chart.defaults.plugins.legend.labels.boxWidth = 6;
+      Chart.defaults.plugins.legend.labels.padding = 20;
+      Chart.defaults.layout.padding = 5; // Basic padding
+
+      const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          // Original datalabels config - ensure plugin is registered
+          datalabels: {
+            color: '#fff',
+            font: { weight: 'bold' },
+            formatter: (value, context) => {
+                 // Basic percentage formatter, adjust if needed per chart type
+                 if (typeof value === 'number') {
+                     return value + '%';
+                 }
+                 return value;
+            }
+          },
+          legend: { /* Uses defaults, can be overridden per chart */ },
+          title: { // Common title settings
+             display: true,
+             color: '#fff',
+             font: { size: 16, weight: '500' }, // Slightly less bold
+             padding: { top: 5, bottom: 15 }
+          },
+           tooltip: { // Standard tooltips
+             backgroundColor: 'rgba(0,0,0,0.8)',
+             titleFont: { weight: 'bold' },
+             bodyFont: { size: 12 },
+             padding: 10,
+             cornerRadius: 4,
+             displayColors: false
+           }
+        },
+         scales: { // Common scale settings
+            x: {
+                ticks: { color: '#aaa', font: { size: 11 } },
+                grid: { color: 'rgba(255, 255, 255, 0.05)' }
+            },
+            y: {
+                ticks: { color: '#aaa', font: { size: 11 } },
+                grid: { color: 'rgba(255, 255, 255, 0.05)' }
+            }
+        },
+         // Add animation object for potential debugging
+         // animation: {
+         //     onComplete: () => { console.log("Chart animation complete."); },
+         //     onProgress: () => { /* console.log("Chart animation progress."); */ }
+         // }
+      };
+
+      // --- Chart Initializations (Original designs + Safe Context Handling) ---
+
+      // 1. Introduction Chart
+      const introCtx = getCanvasContext('introChart');
+      if (introCtx) {
+        try {
+            const introGradient1 = createGradient(introCtx, '#27f94a', '#36ecfd'); // Create gradient AFTER context is valid
+            new Chart(introCtx, {
+              type: 'bar',
+              data: {
+                labels: ['Lecture', 'Active Learning'],
+                datasets: [{
+                  label: 'Exam Scores', data: [70, 76],
+                  backgroundColor: ['rgba(136, 136, 136, 0.7)', introGradient1],
+                  borderWidth: 0, borderRadius: 6
+                }]
+              },
+              options: {
+                ...commonOptions, // Use deep clone if modifying commonOptions per chart
+                scales: {
+                  x: { ...commonOptions.scales.x, grid: { display: false }, title: { display: true, text: 'Instruction Method', color: '#aaa', font: { size: 12 } } },
+                  y: { ...commonOptions.scales.y, min: 60, max: 100, title: { display: true, text: 'Average Exam Score (%)', color: '#aaa', font: { size: 12 } } }
+                },
+                plugins: {
+                  ...commonOptions.plugins,
+                  title: { ...commonOptions.plugins.title, text: 'Lecture vs Active Learning Exam Scores' },
+                  legend: { display: true }, // << Enable legend
+                  datalabels: { ...commonOptions.plugins.datalabels, anchor: 'end', align: 'top', offset: 4 }
+                }
+              }
+            });
+            console.log("introChart initialized.");
+        } catch(e) { console.error("Error initializing introChart:", e); }
+      }
+
+      // 2. Theoretical Framework Chart
+      const loadCtx = getCanvasContext('loadChart');
+      if (loadCtx) {
+         try {
+            const loadGradient = createGradient(loadCtx, '#27f94a', '#36ecfd');
+            new Chart(loadCtx, {
+              type: 'radar',
+              data: {
+                labels: ['Intrinsic Load', 'Extraneous Load', 'Germane Load', 'Working Memory', 'Dual-Channel'],
+                datasets: [{
+                  label: 'Cognitive Impact', data: [40, 35, 45, 50, 30],
+                  backgroundColor: 'rgba(39, 249, 74, 0.2)', borderColor: loadGradient, borderWidth: 2,
+                  pointBackgroundColor: '#36ecfd', pointBorderColor: '#fff', pointRadius: 4,
+                  pointHoverBackgroundColor: '#fff', pointHoverBorderColor: '#27f94a'
+                }]
+              },
+              options: {
+                ...commonOptions,
+                scales: {
+                  r: { // Radar specific scale
+                    angleLines: { color: 'rgba(255, 255, 255, 0.1)' }, grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                    pointLabels: { font: { size: 11 }, color: '#ddd' },
+                    ticks: { backdropColor: 'transparent', showLabelBackdrop: false, stepSize: 10, color: '#aaa', font: { size: 10 } },
+                    min: 0, max: 50
+                   }
+                },
+                plugins: {
+                  ...commonOptions.plugins,
+                  title: { ...commonOptions.plugins.title, text: 'Cognitive Theory Components', font: { ...commonOptions.plugins.title.font, weight: 'bold' } }, // Made bold as per original
+                  legend: { display: true }, // Legend already enabled
+                  datalabels: { display: false } // Original had this hidden
+                }
+              }
+            });
+            console.log("loadChart initialized.");
+         } catch(e) { console.error("Error initializing loadChart:", e); }
+       }
+
+      // 3. Key Findings Chart
+       const keyFindingsCtx = getCanvasContext('keyFindingsChart');
+       if (keyFindingsCtx) {
+         try {
+             const keyFindingsGradient = createGradient(keyFindingsCtx, '#27f94a', '#36ecfd');
+             new Chart(keyFindingsCtx, {
+               type: 'line',
+               data: {
+                 labels: ['Baseline', 'Interactive', 'Gamified', 'Adaptive', 'Peer Instruction'],
+                 datasets: [{
+                   label: 'Improvement %', data: [0, 11, 27, 12, 30],
+                   borderColor: keyFindingsGradient, backgroundColor: 'rgba(39, 249, 74, 0.1)', borderWidth: 3,
+                   pointRadius: 5, pointBackgroundColor: '#36ecfd', pointHoverRadius: 7, tension: 0.4, fill: true
+                 }]
+               },
+               options: {
+                 ...commonOptions,
+                 scales: {
+                   x: { ...commonOptions.scales.x, title: { display: true, text: 'EdTech Method', color: '#aaa', font: { size: 12 } } },
+                   y: { ...commonOptions.scales.y, min: 0, max: 40, title: { display: true, text: 'Improvement (%)', color: '#aaa', font: { size: 12 } } }
+                 },
+                 plugins: {
+                   ...commonOptions.plugins,
+                   title: { ...commonOptions.plugins.title, text: 'EdTech Methods Effectiveness' },
+                   legend: { display: true }, // << Enable legend
+                   datalabels: { display: false } // Original code had this disabled
+                 }
+               }
+             });
+              console.log("keyFindingsChart initialized.");
+         } catch(e) { console.error("Error initializing keyFindingsChart:", e); }
+       }
+
+
+      // 4. Interactive Multimedia Chart
+      const interactiveCtx = getCanvasContext('interactiveChart');
+      if (interactiveCtx) {
+         try {
+            const interactiveGradient1 = createGradient(interactiveCtx, '#27f94a', '#36ecfd');
+            new Chart(interactiveCtx, {
+              type: 'bar',
+              data: {
+                labels: ['Static Media', 'Interactive Media'],
+                datasets: [{
+                  label: 'Post-test Scores', data: [60, 71],
+                  backgroundColor: ['rgba(136, 136, 136, 0.7)', interactiveGradient1],
+                  borderWidth: 0, borderRadius: 6
+                }]
+              },
+              options: {
+                ...commonOptions,
+                 scales: {
+                  x: { ...commonOptions.scales.x, grid: { display: false }, title: { display: true, text: 'Media Type', color: '#aaa', font: { size: 12 } } },
+                  y: { ...commonOptions.scales.y, min: 0, max: 100, title: { display: true, text: 'Post-Test Score (%)', color: '#aaa', font: { size: 12 } } }
+                 },
+                plugins: {
+                  ...commonOptions.plugins,
+                  title: { ...commonOptions.plugins.title, text: 'Static vs Interactive Media Performance' },
+                  legend: { display: true }, // << Enable legend
+                  datalabels: { ...commonOptions.plugins.datalabels, anchor: 'end', align: 'top', offset: 4 } // Restore original datalabel settings
+                }
+              }
+            });
+            console.log("interactiveChart initialized.");
+         } catch(e) { console.error("Error initializing interactiveChart:", e); }
+      }
+
+      // 5. Adaptive Learning Chart
+      const adaptiveCtx = getCanvasContext('adaptiveChart');
+      if (adaptiveCtx) {
+          try {
+             const adaptiveGradient1 = createGradient(adaptiveCtx, '#27f94a', '#36ecfd');
+             new Chart(adaptiveCtx, {
+               type: 'bar',
+               data: {
+                 labels: ['Non-adaptive', 'Adaptive'],
+                 datasets: [{
+                   label: 'Mastery Rate', data: [65, 77],
+                   backgroundColor: ['rgba(136, 136, 136, 0.7)', adaptiveGradient1],
+                   borderWidth: 0, borderRadius: 6
+                 }]
+               },
+               options: {
+                 ...commonOptions,
+                 scales: {
+                   x: { ...commonOptions.scales.x, grid: { display: false }, title: { display: true, text: 'Learning Approach', color: '#aaa', font: { size: 12 } } },
+                   y: { ...commonOptions.scales.y, min: 0, max: 100, title: { display: true, text: 'Mastery Rate (%)', color: '#aaa', font: { size: 12 } } }
+                 },
+                 plugins: {
+                   ...commonOptions.plugins,
+                   title: { ...commonOptions.plugins.title, text: 'Impact of Adaptive Learning' },
+                   legend: { display: true }, // << Enable legend
+                   datalabels: { ...commonOptions.plugins.datalabels, anchor: 'end', align: 'top', offset: 4 } // Restore original datalabel settings
+                 }
+               }
+             });
+             console.log("adaptiveChart initialized.");
+          } catch(e) { console.error("Error initializing adaptiveChart:", e); }
+       }
+
+
+      // 6. Active Learning Chart
+      const activeLearningCtx = getCanvasContext('activeLearningChart');
+      if (activeLearningCtx) {
+         try {
+            const activeLearningGradient = createGradient(activeLearningCtx, '#27f94a', '#36ecfd');
+            new Chart(activeLearningCtx, {
+              type: 'bar',
+              data: {
+                labels: ['Lecture', 'Active Learning'],
+                datasets: [{
+                  // axis: 'y', // This was in original code but redundant with indexAxis:'y'
+                  label: 'Exam Scores', data: [70, 76],
+                  backgroundColor: ['rgba(136, 136, 136, 0.7)', activeLearningGradient],
+                  borderWidth: 0, borderRadius: 6
+                }]
+              },
+              options: {
+                ...commonOptions,
+                indexAxis: 'y', // Makes it horizontal
+                scales: {
+                  x: { ...commonOptions.scales.x, min: 60, max: 100, title: { display: true, text: 'Average Exam Score (%)', color: '#aaa', font: { size: 12 } } },
+                  y: { ...commonOptions.scales.y, grid: { display: false }, title: { display: true, text: 'Instruction Method', color: '#aaa', font: { size: 12 } } }
+                },
+                plugins: {
+                  ...commonOptions.plugins,
+                  title: { ...commonOptions.plugins.title, text: 'Impact of Active Learning on Exam Scores' },
+                  legend: { display: true }, // << Enable legend
+                  datalabels: { ...commonOptions.plugins.datalabels, align: 'end', anchor: 'end', offset: 8 } // Restore original datalabel settings
+                }
+               }
+            });
+            console.log("activeLearningChart initialized.");
+         } catch(e) { console.error("Error initializing activeLearningChart:", e); }
+      }
+
+
+      // 7. Consequences (Poor Design) Chart
+       const poorDesignCtx = getCanvasContext('poorDesignChart'); // Corrected ID from HTML
+       if (poorDesignCtx) {
+           try {
+               // Define gradients needed for this specific chart
+               const poorDesignGradient1 = createGradient(poorDesignCtx, '#27f94a', '#36ecfd');
+               const poorDesignGradient2 = createGradient(poorDesignCtx, '#36ecfd', '#1da1f2'); // Replaced Red gradient with cyan/blue
+
+               new Chart(poorDesignCtx, {
+                   type: 'bar',
+                   data: {
+                       labels: ['No Phone Use', 'Phone Use'], // Match case in original text section if needed
+                       datasets: [{
+                           label: 'Retention Rate',
+                           // Using 85% baseline vs 55% (30% lower) from original data
+                           data: [85, 55],
+                           backgroundColor: [
+                               poorDesignGradient1, // Green/Cyan gradient
+                               poorDesignGradient2  // << Replaced Red gradient with cyan/blue one
+                           ],
+                           borderWidth: 0,
+                           borderRadius: 6
+                       }]
+                   },
+                   options: {
+                       ...commonOptions,
+                       scales: {
+                           x: { ...commonOptions.scales.x, grid: { display: false }, title: { display: true, text: 'Classroom Behavior', color: '#aaa', font: { size: 12 } } },
+                           y: { ...commonOptions.scales.y, beginAtZero: true, max: 100, title: { display: true, text: 'Information Retention (%)', color: '#aaa', font: { size: 12 } } }
+                       },
+                       plugins: {
+                           ...commonOptions.plugins,
+                           title: { ...commonOptions.plugins.title, text: 'Mobile Phone Impact on Learning Retention' },
+                           legend: { display: true }, // << Enable legend
+                           datalabels: { ...commonOptions.plugins.datalabels, anchor: 'end', align: 'top', offset: 4 }
+                       }
+                   }
+               });
+               console.log("poorDesignChart initialized.");
+           } catch (e) { console.error("Error initializing poorDesignChart:", e); }
+       }
+
+
+      // 8. MOOC Completion Chart
+       const moocCtx = getCanvasContext('moocChart');
+       if (moocCtx) {
+           try {
+               new Chart(moocCtx, {
+                   type: 'pie',
+                   data: {
+                       // Labels from original script's chart setup
+                       labels: ['Completed (7%)', 'Dropped (93%)'],
+                       datasets: [{
+                           label: 'Completion Status', // Added label for legend
+                           data: [7, 93],
+                           backgroundColor: ['#27f94a', '#36ecfd'], // << Replaced red with #36ecfd
+                           borderWidth: 2, // Keep border for visual separation
+                           borderColor: '#121212' // Match card background
+                       }]
+                   },
+                   options: {
+                       ...commonOptions,
+                       plugins: {
+                           ...commonOptions.plugins,
+                           title: { ...commonOptions.plugins.title, text: 'MOOC Completion Rates' },
+                           legend: { display: true }, // << Enable legend
+                           datalabels: { // Restore original datalabel settings for pie
+                               ...commonOptions.plugins.datalabels,
+                               formatter: (value) => value + '%', // Show percentage value
+                               color: '#fff',
+                               font: { weight: 'bold' }
+                           },
+                           tooltip: { // Restore tooltip specific for pie
+                               callbacks: {
+                                   label: function(context) {
+                                       // Show the original label (like 'Completed (7%)') in tooltip
+                                       let label = context.dataset.label || '';
+                                       if (label) {
+                                            label += ': ';
+                                       }
+                                       if (context.parsed !== null) {
+                                           label += context.label + ' - ' + context.parsed + '%';
+                                       }
+                                       return label;
+                                   }
+                               }
+                            }
+                       }
+                   }
+               });
+                console.log("moocChart initialized.");
+           } catch (e) { console.error("Error initializing moocChart:", e); }
+       }
+
+      // 9. Recommendations Chart
+      const recommendationCtx = getCanvasContext('recommendationChart');
+      if (recommendationCtx) {
+           try {
+               const recommendationGradient = createGradient(recommendationCtx, '#27f94a', '#36ecfd');
+               new Chart(recommendationCtx, {
+                   type: 'bar',
+                   data: {
+                       labels: ['Guided Media', 'Minimize Distr.', 'Retrieval Practice', 'Adaptive Feedback', 'Peer Interaction'],
+                       datasets: [{
+                           label: 'Effectiveness',
+                           data: [22, 18, 25, 28, 30], // Original hypothetical data
+                           backgroundColor: recommendationGradient, // Restore gradient
+                           borderWidth: 0,
+                           borderRadius: 6
+                       }]
+                   },
+                   options: {
+                       ...commonOptions,
+                       indexAxis: 'y', // Horizontal
+                       scales: {
+                           x: { ...commonOptions.scales.x, max: 40, beginAtZero: true, title: { display: true, text: 'Effectiveness Improvement (%)', color: '#aaa', font: { size: 12 } } },
+                           y: { ...commonOptions.scales.y, grid: { display: false } }
+                       },
+                       plugins: {
+                           ...commonOptions.plugins,
+                           title: { ...commonOptions.plugins.title, text: 'Recommended Strategies Effectiveness' },
+                           legend: { display: true }, // << Enable legend
+                           datalabels: { ...commonOptions.plugins.datalabels, align: 'end', anchor: 'end', offset: 8 } // Restore original datalabel settings
+                       }
+                   }
+               });
+                console.log("recommendationChart initialized.");
+           } catch (e) { console.error("Error initializing recommendationChart:", e); }
+      }
+
+      console.log("Chart initialization finished."); // Final debug log
+
+    // --- End of DOMContentLoaded listener ---
+    });
+  </script>
+</body>
+</html>
